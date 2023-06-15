@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"net"
 )
@@ -35,8 +36,22 @@ func NewClient(serverIp string, serverPort int) *Client {
 	return client
 }
 
+// 两个全局形参绑定到flag包中
+var serverIp string
+var serverPort int
+
+// 每个go文件都有一个init函数，这个函数会在main函数前执行
+// 初始化命令行参数
+func init() {
+	flag.StringVar(&serverIp, "ip", "127.0.0.1", "设置服务器IP地址(默认是127.0.0.1)")
+	flag.IntVar(&serverPort, "port", 8888, "设置服务器端口(默认是8888)")
+}
+
 func main() {
-	client := NewClient("127.0.0.1", 8888)
+	// 命令行解析，可以指定客户端
+	flag.Parse()
+
+	client := NewClient(serverIp, serverPort)
 	if client == nil {
 		fmt.Println(">>>>> 链接服务器失败...")
 		return
