@@ -50,8 +50,8 @@ func (client *Client) menu() bool {
 	var flag int
 
 	fmt.Println("1.公聊模式")
-	fmt.Println("1.私聊模式")
-	fmt.Println("1.更新用户名")
+	fmt.Println("2.私聊模式")
+	fmt.Println("3.更新用户名")
 	fmt.Println("0.退出")
 
 	fmt.Scanln(&flag)
@@ -62,6 +62,32 @@ func (client *Client) menu() bool {
 	} else {
 		fmt.Println(">>>>>>请输入合法范围内的数字<<<<<<<<")
 		return false
+	}
+}
+
+func (client *Client) PublicChat() {
+	// 提示用户输入消息
+	var chatMsg string
+
+	fmt.Println(">>>>请输入聊天内容,exit退出.")
+	fmt.Scanln(&chatMsg)
+
+	for chatMsg != "exit" {
+		//发给服务器
+
+		// 消息不为空则发送
+		if len(chatMsg) != 0 {
+			sendMsg := chatMsg + "\n"
+			_, err := client.conn.Write([]byte(sendMsg))
+			if err != nil {
+				fmt.Println("conn Write err:", err)
+				break
+			}
+		}
+
+		chatMsg = ""
+		fmt.Println(">>>>请输入聊天内容,exit退出")
+		fmt.Scanln(&chatMsg)
 	}
 }
 
@@ -90,11 +116,10 @@ func (client *Client) Run() {
 		switch client.flag {
 		case 1:
 			//公聊模式
-			fmt.Println("公聊模式选择...")
-			break
+			client.PublicChat()
 		case 2:
 			//私聊模式
-			fmt.Println("公聊模式选择...")
+			fmt.Println("私聊模式选择...")
 		case 3:
 			//更新用户名
 			client.UpdateName()
