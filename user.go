@@ -1,6 +1,9 @@
 package main
 
-import "net"
+import (
+	"net"
+	"strings"
+)
 
 // User 后端表示用户的结构体封装
 type User struct {
@@ -72,6 +75,24 @@ func (this *User) DoMessage(msg string) {
 		}
 		this.server.mapLock.Unlock()
 
+	} else if len(msg) > 7 && msg[:7] == "rename|" {
+		// 消息格式: rename|张三
+		newName := strings.Split(msg, "|")[1]
+
+		// 判断name是否存在
+		_, ok := this.server.OnlineMap[newName]
+		if ok {
+			this.SendMsg("当前用户名被使用\n")
+		} else {
+			this.server.mapLock.Lock()
+			delete(this.server.OnlineMap, this.Name)
+			this.server.OnlineMap[newName] = this
+			this.server.mapLock.Unlock()
+
+			// 将新的用户名赋给方法结构体
+			this.Name = newName
+			this.SendMsg("您已经更新用户名:" + this.Name + "\n")
+		}
 	} else {
 		this.server.BroadCast(this, msg)
 	}
